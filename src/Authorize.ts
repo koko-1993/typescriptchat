@@ -1,5 +1,6 @@
 import { auth, provider } from "./firebaseConfig";
 import { User } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import {
     createUserWithEmailAndPassword,
     updateProfile,
@@ -43,6 +44,32 @@ export class Authorize {
 
 
     }
+
+    private getAuthErrorMessage(error:unknown):string {
+        if(!(error instanceof FirebaseError)){
+            return error instanceof Error ? error.message : "Unknown error";
+        }
+
+        switch(error.code){
+        case "auth/invalid-credential":
+            return "Email or password is incorrect. If you signed up with Google, use Google login instead.";
+        case "auth/user-not-found":
+            return "No account was found with that email.";
+        case "auth/wrong-password":
+            return "Password is incorrect.";
+        case "auth/email-already-in-use":
+            return "That email is already registered.";
+        case "auth/invalid-email":
+            return "Email address format is invalid.";
+        case "auth/weak-password":
+            return "Password is too weak. Use at least 6 characters.";
+        case "auth/too-many-requests":
+            return "Too many attempts. Please wait a moment and try again.";
+        default:
+            return error.message;
+        }
+    }
+
     // helper to redirect relative to current directory
     redirectTo(page:string):void {
         const base = window.location.pathname.replace(/\/[^/]*$/, '/');
@@ -74,7 +101,7 @@ export class Authorize {
 
         } catch (error:unknown) {
             console.error("Error registering users : ", error);
-            const message = error instanceof Error ? error.message : "Unknown error";
+            const message = this.getAuthErrorMessage(error);
             window.alert(message);
         }
 
@@ -98,8 +125,8 @@ export class Authorize {
 
         } catch (error:unknown) {
             console.error("Error Login users : ", error);
-            const message = error instanceof Error ? error.message : "Unknown error";
-            window.alert(message);
+            const message = this.getAuthErrorMessage(error);
+            throw new Error(message);
         }
 
     }
@@ -119,7 +146,7 @@ export class Authorize {
 
         } catch (error:unknown) {
             console.error("Error Logout users : ", error);
-            const message = error instanceof Error ? error.message : "Unknown error";
+            const message = this.getAuthErrorMessage(error);
             window.alert(message);
         }
 
@@ -139,7 +166,7 @@ export class Authorize {
         } catch (error:unknown) {
 
             console.error("Error sending password reset email = ", error);
-            const message = error instanceof Error ? error.message : "Unknown error";
+            const message = this.getAuthErrorMessage(error);
             window.alert(message);
 
             msgElement.textContent = `Error : ${message}`;
@@ -166,7 +193,7 @@ export class Authorize {
 
         } catch (error:unknown) {
             console.error("Error with Google sign-in = ", error);
-            const message = error instanceof Error ? error.message : "Unknown error";
+            const message = this.getAuthErrorMessage(error);
             window.alert(message);
         }
 

@@ -20,16 +20,18 @@
 
                 <div class="mb-3">
                     <label for="signinemail" class="form-label">Email</label>
-                    <input type="email" name="signinemail" id="signinemail" class="form-control" placeholder="Email" required />
+                    <input type="email" name="signinemail" id="signinemail" class="form-control" placeholder="Email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="email" required />
                 </div>
 
                 <div class="mb-3">
                     <label for="signinpassword" class="form-label">Password</label>
-                    <input type="password" name="signinpassword" id="signinpassword" class="form-control" placeholder="Password" required />
+                    <input type="password" name="signinpassword" id="signinpassword" class="form-control" placeholder="Password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required />
                 </div>
 
+                <div id="signinStatus" class="auth-status"></div>
+
                 <div class="d-flex justify-content-end mb-3">
-                    <button type="submit" class="btn btn-primary">Sign In</button>
+                    <button type="submit" id="signinSubmitBtn" class="btn btn-primary">Sign In</button>
                 </div>
 
             </form>
