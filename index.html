@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="./css/style.css" rel="stylesheet" type="text/css" />
+    <title>Chat Box</title>
+    <script src="./dist/authcheck.js" type="module"></script>
+  </head>
+  <body class="bg-light">
+    
+    <div class="container my-5 shadow-lg rounded-4 chat-containers">
+
+        <!-- sidebar -->
+        <aside class="text-white d-flex flex-column justify-content-between p-3 chat-sidebars">
+
+            <div class="">
+                <h4 class="text-center mb-4">Chat Rooms</h4>
+                <button type="button" id="general" class="btn w-100 mb-2"><i class="fa-solid fa-comments"></i>#general</button>
+                <button type="button" id="laravel" class="btn w-100 mb-2"><i class="fa-brands fa-laravel"></i>#laravel</button>
+                <button type="button" id="nodejs" class="btn w-100 mb-2"><i class="fa-brands fa-node-js"></i>#nodejs</button>
+            </div>
+
+            <!-- update name -->
+            <form class="new-nameform">
+                <div class="small text-success text-center mb-2 update-msg"></div>
+                <div class="input-group">
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Update your name..." required />
+                    <button type="submit" class="btn update-btns"><i class="fa-solid fa-user-pen"></i></button>
+                </div>
+            </form>
+
+        </aside>
+
+
+        <!-- chatbox main area -->
+        <main class="chat-mains d-flex flex-column flex-grow-1">
+
+            <!-- header -->
+            <header class="border-bottom d-flex justify-content-between align-items-center p-3 chat-headers">
+                <h4 class="m-0"><i class="fa-solid fa-message"></i> Chat Box - <span id="roomtitle">general</span></h4>
+
+                <!-- profile button dropdown -->
+                 <div class="dropdown">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-user-circle me-2"></i>
+                        <span id="profilename">Guest</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="./profile.html" class="dropdown-item"><i class="fa-solid fa-id-badge me-2"></i>View Profile</a></li>
+                    </ul>
+                 </div>
+            </header>
+
+
+            <!-- chat message -->
+            <div class="flex-grow-1 overflow-auto p-3 chat-contents">
+                <ul class="list-group chat-lists">
+                    <!-- <li class="list-group-item">
+                        <span class="username">Bo Bo</span>
+                        <span class="message">How are your</span>
+                        <div class="time">15 mins ago</div>
+                    </li> -->
+                </ul>
+            </div>
+
+
+            <!-- message input -->
+            <form class="border-top p-3 new-chatform">
+                <div class="input-group">
+                    <input type="text" id="message" class="form-control" placeholder="Type your message..." required />
+                    <button type="submit" class="btn send-btns"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </form>
+
+        </main>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="./dist/app.js" type="module"></script>
+  </body>
+</html>

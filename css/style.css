@@ -1,0 +1,76 @@
+*{
+    box-sizing: border-box;
+}
+
+.chat-containers{
+    height: 80vh;
+    background-color: #fff;
+    border-radius: 1rem;
+
+    display: flex;
+    overflow: hidden;
+}
+
+.chat-sidebars{
+    min-width: 200px;
+    background-color: #03032f;
+}
+
+.chat-sidebars .btn{
+    background-color: #0d0d47;
+    color: #fff;
+    border: none;
+    text-align: left;
+    border-radius: 0.5rem;
+
+    padding: 10px;
+
+    transition: background-color 0.2s ease-in-out;
+}
+
+.chat-sidebars .btn:hover{
+    background-color: #17175c;
+}
+
+.chat-mains{
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-contents{
+    background-color: #f9f9f9;
+}
+
+.chat-lists li{
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.send-btns{
+    background-color: #03032f;
+    color: #fff;
+}
+
+.username{
+    font-weight: 600;
+    color: #0d0d47;
+}
+
+.time{
+    font-size: 11px;
+    color: #aaa;
+    margin-left: 5px;
+}
+
+.update-btns{
+    background-color: #03032f;
+    color: #fff;
+}
+
+.update-msg{
+    font-weight: 500;
+}

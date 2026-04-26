@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Signin</title>
+  </head>
+  <body class="bg-light vh-100 d-flex justify-content-center align-items-center">
+    
+    <div class="card shadow-sm" style="width: 100%; max-width: 400px;">
+
+        <div class="card-body p-4">
+
+            <h5 class="card-title text-center mb-4">Signin</h5>
+
+            <form id="signinform">
+
+                <div class="mb-3">
+                    <label for="signinemail" class="form-label">Email</label>
+                    <input type="email" name="signinemail" id="signinemail" class="form-control" placeholder="Email" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="signinpassword" class="form-label">Password</label>
+                    <input type="password" name="signinpassword" id="signinpassword" class="form-control" placeholder="Password" required />
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </div>
+
+            </form>
+
+            <div class="text-center">
+                <a href="./reset.html" class="d-block text-decoration-none text-primary mb-2">Forgot Password ?</a>
+                <a href="./signup.html" class="d-block text-decoration-none text-primary mb-2">Don't have an account? Sign up here!</a>
+            </div>
+
+            <hr class="my-3"/>
+
+            <button type="button" id="googleloginbtn" class="w-100 btn btn-outline-danger"><i class="fab fa-google"></i>Login with Google</button>
+
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integr\ity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="./dist/authsignin.js" type="module"></script>
+
+
+
+    
+  </body>
+</html>

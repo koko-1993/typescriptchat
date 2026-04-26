@@ -1,0 +1,133 @@
+npm init -y
+npm install typescript --save-dev
+npx tsc --init
+
+create src > index.ts 
+
+tsc -w
+
+----------------------------------------
+
+=> axios
+
+https://www.npmjs.com/package/axios
+npm i axios
+
+
+import axios from "axios";
+
+
+-----------------------------------------------------------------------------
+
+=> node fetch
+
+https://www.npmjs.com/package/node-fetch
+npm i node-fetch
+
+
+
+-----------------------------------------------------------------------------
+
+
+
+=> Install firebase
+
+npm install firebase
+
+
+-----------------------------------------------------------------------------
+
+
+=> Webpack ( ver : 5 )
+
+  (i) Install (wepack 5)
+      https://webpack.js.org/ > Documentation > Guides > Getting Started (Basic Setup)> npm install webpack webpack-cli --save-dev
+      https://webpack.js.org/ > Documentation > Guides > Development > Using webpack-dev-server > npm install --save-dev webpack-dev-server
+      https://webpack.js.org/ > Documentation > Guides > Typescript > npm install --save-dev typescript ts-loader
+
+
+  (ii) create webpack.config.js
+      https://webpack.js.org/ > Documentation > Guides > Typescript (webpack.config.js)
+
+      const path = require('path');
+
+      module.exports = {
+        entry: './src/index.ts',
+        mode: 'development',            // development or production , add this line from ->https://webpack.js.org/ > Documentation > Configuration > mode
+        module: {
+          rules: [
+            {
+              test: /\.tsx?$/,
+              use: 'ts-loader',
+              exclude: /node_modules/,
+            },
+          ],
+        },
+        resolve: {
+          extensions: ['.tsx', '.ts', '.js'],
+        },
+        output: {
+          filename: 'bundle.js',
+          path: path.resolve(__dirname, 'dist'),  // change to public
+        },
+      };
+
+
+
+    (iii) add DevServer config to webpack.config.js
+          https://webpack.js.org/ > Documentation > Configuration > DevServer >
+
+            devServer: {
+              static: {
+                directory: path.join(__dirname, 'public'),
+              },
+              compress: true,
+              port: 9000,
+            },
+    
+    (iv) config package.json
+        "watch" : "tsc -w",
+        "webpack" : "webpack",
+        "dev" : "webpack serve"
+
+
+
+    (v) create public folder
+    (vi) create file public > index.html
+    (vii) <script src="./bundle.js"></script>
+
+
+=> build
+  npm run webpack
+
+    (or)
+
+  npm run dev 
+  npm run watch
+
+--------------------------------------------------------------
+
+=> tsconfig.json **** 
+// "module": "commonjs", ပါရင် moduleResolution ကို ဖြုတ်ပေးရမယ်
+
+
+--------------------------------------------------------------
+=> Install date-fns 
+
+  https://date-fns.org/docs/Getting-Started
+  npm install date-fns --save
+
+--------------------------------------------------------------
+
+=> Deploy on render.com
+
+new > Static Site
+Public Directory = ./
+
+-----
+
+=> Give domain access
+
+Firebase > Authentication > Settings > Authorized domain > add your domain eg:
+
+--------------------------------------------------------------
