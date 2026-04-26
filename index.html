@@ -18,9 +18,23 @@
 
             <div class="">
                 <h4 class="text-center mb-4">Chat Rooms</h4>
-                <button type="button" id="general" class="btn w-100 mb-2"><i class="fa-solid fa-comments"></i>#general</button>
-                <button type="button" id="laravel" class="btn w-100 mb-2"><i class="fa-brands fa-laravel"></i>#laravel</button>
-                <button type="button" id="nodejs" class="btn w-100 mb-2"><i class="fa-brands fa-node-js"></i>#nodejs</button>
+                <div id="roomList"></div>
+
+                <!-- create room -->
+                <div class="create-room-section mt-3">
+                    <form class="new-roomform" id="newRoomForm">
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="newRoomName" class="form-control" placeholder="New room name..." required />
+                            <button type="submit" class="btn create-room-btn" title="Create Room"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- online users -->
+                <div class="online-users-section mt-3">
+                    <div class="online-users-header"><i class="fa-solid fa-circle" style="color:#26de81;font-size:8px"></i> Online <span id="onlineCount" class="online-count">0</span></div>
+                    <div class="online-users-list" id="onlineUsersList"></div>
+                </div>
             </div>
 
             <!-- update name -->
@@ -42,17 +56,38 @@
             <header class="border-bottom d-flex justify-content-between align-items-center p-3 chat-headers">
                 <h4 class="m-0"><i class="fa-solid fa-message"></i> Chat Box - <span id="roomtitle">general</span></h4>
 
-                <!-- profile button dropdown -->
-                 <div class="dropdown">
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-user-circle me-2"></i>
-                        <span id="profilename">Guest</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a href="./profile.html" class="dropdown-item"><i class="fa-solid fa-id-badge me-2"></i>View Profile</a></li>
-                    </ul>
-                 </div>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- search -->
+                    <div class="search-box" id="searchBox">
+                        <button type="button" class="btn btn-sm search-toggle-btn" id="searchToggleBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <input type="text" class="form-control form-control-sm search-input" id="searchInput" placeholder="Search messages..." style="display:none;" />
+                    </div>
+
+                    <!-- profile button dropdown -->
+                     <div class="dropdown">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-user-circle me-2"></i>
+                            <span id="profilename">Guest</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="./profile.html" class="dropdown-item"><i class="fa-solid fa-id-badge me-2"></i>View Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button type="button" id="themeToggleBtn" class="dropdown-item"><i class="fa-solid fa-moon me-2"></i>Dark Mode</button></li>
+                            <li><button type="button" id="soundToggleBtn" class="dropdown-item"><i class="fa-solid fa-volume-high me-2"></i>Sound: ON</button></li>
+                        </ul>
+                     </div>
+                </div>
             </header>
+
+
+            <!-- pinned messages bar -->
+            <div class="pinned-bar" id="pinnedBar" style="display:none;">
+                <div class="pinned-bar-header">
+                    <i class="fa-solid fa-thumbtack"></i> <span id="pinnedCount">0</span> Pinned
+                    <button type="button" class="btn btn-sm pinned-toggle-btn" id="pinnedToggleBtn"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+                <div class="pinned-messages-list" id="pinnedMessagesList" style="display:none;"></div>
+            </div>
 
 
             <!-- chat message -->
@@ -67,11 +102,56 @@
             </div>
 
 
+            <!-- reaction picker popup -->
+            <div class="reaction-picker" id="reactionPicker" style="display:none;">
+                <span class="reaction-option" data-emoji="👍">👍</span>
+                <span class="reaction-option" data-emoji="❤️">❤️</span>
+                <span class="reaction-option" data-emoji="😂">😂</span>
+                <span class="reaction-option" data-emoji="😮">😮</span>
+                <span class="reaction-option" data-emoji="😢">😢</span>
+                <span class="reaction-option" data-emoji="🔥">🔥</span>
+                <span class="reaction-option" data-emoji="🎉">🎉</span>
+                <span class="reaction-option" data-emoji="💯">💯</span>
+            </div>
+
+            <!-- reply preview bar -->
+            <div class="reply-bar" id="replyBar" style="display:none;">
+                <div class="reply-bar-content">
+                    <i class="fa-solid fa-reply"></i>
+                    <span id="replyPreviewText"></span>
+                </div>
+                <button type="button" class="btn btn-sm reply-cancel-btn" id="replyCancelBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- mention suggestions -->
+            <div class="mention-popup" id="mentionPopup" style="display:none;"></div>
+
+            <!-- typing indicator -->
+            <div class="typing-indicator" style="display:none;"></div>
+
             <!-- message input -->
             <form class="border-top p-3 new-chatform">
                 <div class="input-group">
                     <input type="text" id="message" class="form-control" placeholder="Type your message..." required />
+                    <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+                    <button type="button" id="fileUploadBtn" class="btn file-upload-btn" title="Send Image"><i class="fa-solid fa-image"></i></button>
+                    <button type="button" id="emojiToggleBtn" class="btn emoji-toggle-btn"><i class="fa-solid fa-face-smile"></i></button>
                     <button type="submit" class="btn send-btns"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+                <!-- emoji picker -->
+                <div class="emoji-picker" id="emojiPicker" style="display:none;">
+                    <div class="emoji-grid">
+                        <span class="emoji-item">😀</span><span class="emoji-item">😂</span><span class="emoji-item">😍</span><span class="emoji-item">🥰</span>
+                        <span class="emoji-item">😎</span><span class="emoji-item">🤔</span><span class="emoji-item">😢</span><span class="emoji-item">😭</span>
+                        <span class="emoji-item">😡</span><span class="emoji-item">🤯</span><span class="emoji-item">😱</span><span class="emoji-item">🥳</span>
+                        <span class="emoji-item">😴</span><span class="emoji-item">🤗</span><span class="emoji-item">😏</span><span class="emoji-item">🤩</span>
+                        <span class="emoji-item">👍</span><span class="emoji-item">👎</span><span class="emoji-item">👏</span><span class="emoji-item">🙌</span>
+                        <span class="emoji-item">💪</span><span class="emoji-item">🤝</span><span class="emoji-item">✌️</span><span class="emoji-item">👋</span>
+                        <span class="emoji-item">❤️</span><span class="emoji-item">🔥</span><span class="emoji-item">⭐</span><span class="emoji-item">💯</span>
+                        <span class="emoji-item">✅</span><span class="emoji-item">❌</span><span class="emoji-item">💡</span><span class="emoji-item">🎉</span>
+                        <span class="emoji-item">🚀</span><span class="emoji-item">💻</span><span class="emoji-item">📱</span><span class="emoji-item">🎮</span>
+                        <span class="emoji-item">🎵</span><span class="emoji-item">💬</span><span class="emoji-item">📌</span><span class="emoji-item">⚡</span>
+                    </div>
                 </div>
             </form>
 

@@ -1,7 +1,8 @@
 import { Authorize } from "./Authorize";
 import { MessageUI } from "./MessageUi";
+import { auth } from "./firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
-// ui
 // const ulele = document.getElementById("userinfo") as HTMLElement;
 // const logoutbtn = document.getElementById("logoutbtn") as HTMLButtonElement;
 
@@ -21,14 +22,14 @@ if(!ulele || !logoutbtn){
 
 
 const authObj = new Authorize();
-const msguiObj = new MessageUI(ulele);
 
-authObj.getUser((data)=>{
-    if(data){
-        // console.log(data);
-        msguiObj.userInfo(data);
+// wait for auth to get UID
+onAuthStateChanged(auth,(user)=>{
+    if(user){
+        const msguiObj = new MessageUI(ulele, user.uid);
+        msguiObj.userInfo(user);
     }
-})
+});
 
 // logout
 logoutbtn.addEventListener("click",()=>{
