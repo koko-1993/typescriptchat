@@ -1017,28 +1017,35 @@ hr {
 @media (max-width: 768px) {
     .chat-containers {
         flex-direction: column;
-        height: 95vh;
-        border-radius: var(--radius-lg);
-        margin: 10px !important;
+        height: auto;
+        min-height: 100dvh;
+        max-width: none;
+        width: 100%;
+        border-radius: 0;
+        margin: 0 !important;
     }
 
     .chat-sidebars {
         min-width: 100%;
         max-width: 100%;
-        flex-direction: row !important;
-        padding: 12px !important;
-        gap: 8px;
-        align-items: center;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px !important;
+        gap: 16px;
     }
 
     .chat-sidebars h4 {
-        display: none;
+        display: block;
+        text-align: left !important;
     }
 
     .chat-sidebars > div:first-child {
         display: flex;
-        gap: 8px;
-        flex: 1;
+        flex-direction: column;
+        gap: 16px;
+        flex: none;
+        min-width: 0;
     }
 
     .chat-sidebars .btn {
@@ -1047,18 +1054,102 @@ hr {
     }
 
     .new-nameform {
-        border-top: none;
-        padding-top: 0;
-        flex: 1;
-        max-width: 200px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 12px;
+        width: 100%;
+        max-width: none;
     }
 
     .new-nameform .form-control {
         padding: 8px 10px !important;
     }
 
+    .room-list-item {
+        align-items: stretch;
+    }
+
+    .room-manage-actions {
+        opacity: 1;
+    }
+
+    .chat-headers {
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-start !important;
+    }
+
     .chat-headers h4 {
         font-size: 14px;
+        width: 100%;
+    }
+
+    .chat-headers > div:last-child {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px !important;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .search-box {
+        flex: 1 1 100%;
+        order: 3;
+    }
+
+    .search-input {
+        max-width: none;
+        width: 100%;
+    }
+
+    .chat-mains {
+        min-height: 0;
+    }
+
+    .chat-contents {
+        min-height: 38vh;
+    }
+
+    .new-chatform .input-group {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, auto));
+        gap: 8px;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+        background: transparent;
+    }
+
+    .new-chatform .input-group > .form-control {
+        grid-column: 1 / -1;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .new-chatform .input-group > .btn {
+        border-radius: var(--radius-md) !important;
+        min-height: 46px;
+    }
+
+    .file-upload-btn,
+    .emoji-toggle-btn {
+        border: 1px solid var(--border-color) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .send-btns {
+        justify-self: end;
+    }
+
+    .reply-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .chat-image {
+        max-width: 100%;
+        height: auto;
     }
 
     .card {
@@ -2185,7 +2276,8 @@ hr {
     }
 
     .chat-lists li {
-        max-width: 92%;
+        max-width: 100%;
+        padding: 10px 12px !important;
     }
 
     .room-member-item {
@@ -2195,5 +2287,55 @@ hr {
 
     .room-member-actions {
         width: 100%;
+    }
+
+    .online-user-item {
+        padding: 6px 8px;
+    }
+
+    .message-actions {
+        opacity: 1;
+    }
+
+    .pinned-bar-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-sidebars {
+        padding: 14px !important;
+    }
+
+    .chat-sidebars .btn,
+    .room-manage-toggle-btn,
+    .search-toggle-btn,
+    .chat-headers .btn-outline-secondary {
+        font-size: 11px !important;
+    }
+
+    .chat-headers h4 {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .room-admin-card,
+    .room-members-panel {
+        padding: 12px;
+    }
+
+    .room-member-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .room-member-btn,
+    .room-admin-action-btn {
+        width: 100%;
+    }
+
+    .reply-bar-content {
+        white-space: normal;
     }
 }
