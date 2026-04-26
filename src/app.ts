@@ -27,6 +27,7 @@ const chatlistgroup = document.querySelector<HTMLElement>(".chat-lists")!;
 const newchatform = document.querySelector<HTMLFormElement>(".new-chatform")!;
 const profilename = document.querySelector<HTMLElement>("#profilename")!;
 const roomtitle = document.querySelector<HTMLElement>("#roomtitle")!;
+const roomsubtitle = document.querySelector<HTMLElement>("#roomsubtitle")!;
 const chatcontent = document.querySelector<HTMLElement>(".chat-contents")!;
 const typingEl = document.querySelector<HTMLElement>(".typing-indicator")!;
 const emojiPicker = document.querySelector<HTMLElement>("#emojiPicker")!;
@@ -55,6 +56,7 @@ const onlineCountEl = document.querySelector<HTMLElement>("#onlineCount")!;
 const fileUploadBtn = document.querySelector<HTMLElement>("#fileUploadBtn")!;
 const fileInput = document.querySelector<HTMLInputElement>("#fileInput")!;
 const manageRoomBtn = document.querySelector<HTMLButtonElement>("#manageRoomBtn")!;
+const mobileBackBtn = document.querySelector<HTMLButtonElement>("#mobileBackBtn")!;
 const roomMetaBar = document.querySelector<HTMLElement>("#roomMetaBar")!;
 const roomVisibilityLabel = document.querySelector<HTMLElement>("#roomVisibilityLabel")!;
 const roomMemberCount = document.querySelector<HTMLElement>("#roomMemberCount")!;
@@ -75,6 +77,7 @@ if(
     !newchatform ||
     !profilename ||
     !roomtitle ||
+    !roomsubtitle ||
     !chatcontent ||
     !typingEl ||
     !emojiPicker ||
@@ -103,6 +106,7 @@ if(
     !fileUploadBtn ||
     !fileInput ||
     !manageRoomBtn ||
+    !mobileBackBtn ||
     !roomMetaBar ||
     !roomVisibilityLabel ||
     !roomMemberCount ||
@@ -171,6 +175,21 @@ function clearUrlParams():void{
     window.history.replaceState({}, document.title, window.location.pathname);
 }
 
+function isMobileViewport():boolean{
+    return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function setMobileConversationView(mode:"list"|"thread"):void{
+    if(!isMobileViewport()){
+        chatsidebar.classList.remove("mobile-list-hidden");
+        document.body.classList.remove("mobile-thread-active");
+        return;
+    }
+
+    document.body.classList.toggle("mobile-thread-active", mode === "thread");
+    chatsidebar.classList.toggle("mobile-list-hidden", mode === "thread");
+}
+
 let soundEnabled = localStorage.getItem("soundEnabled") !== "false";
 
 function playNotificationSound():void{
@@ -229,9 +248,10 @@ emojiPicker.addEventListener("click",(event)=>{
     const target = event.target as HTMLElement;
     if(!target.classList.contains("emoji-item")) return;
 
-    const messageInput = newchatform.querySelector<HTMLInputElement>("#message");
+    const messageInput = getMessageComposer();
     if(messageInput){
         messageInput.value += target.textContent || "";
+        resizeComposer();
         messageInput.focus();
     }
 });
@@ -244,6 +264,20 @@ document.addEventListener("click",(event)=>{
 });
 
 let searchActive = false;
+
+function getMessageComposer():HTMLTextAreaElement | null{
+    return newchatform.querySelector<HTMLTextAreaElement>("#message");
+}
+
+function resizeComposer():void{
+    const composer = getMessageComposer();
+    if(!composer) return;
+
+    composer.style.height = "auto";
+    const nextHeight = Math.min(composer.scrollHeight, 140);
+    composer.style.height = `${nextHeight}px`;
+    composer.style.overflowY = composer.scrollHeight > 140 ? "auto" : "hidden";
+}
 
 searchToggleBtn.addEventListener("click",()=>{
     searchActive = !searchActive;
@@ -347,7 +381,7 @@ function setComposerContext(mode:ComposerMode, id:string, username:string, messa
     replyPreviewText.textContent = `${username}: ${message.substring(0, 60)}${message.length > 60 ? "..." : ""}`;
     replyBar.style.display = "flex";
 
-    const messageInput = newchatform.querySelector<HTMLInputElement>("#message");
+    const messageInput = getMessageComposer();
     messageInput?.focus();
 }
 
@@ -519,6 +553,27 @@ onAuthStateChanged(auth,(user)=>{
     function getRoomDisplayName(roomName:string):string{
         const room = getRoomByName(roomName);
         return room?.type === "dm" ? getDmDisplayName(room) : roomName;
+    }
+
+    function getRoomSubtitle(roomName:string):string{
+        const room = getRoomByName(roomName);
+
+        if(room?.type === "dm"){
+            const otherUid = (room.participants || []).find((uid)=> uid !== currentUid);
+            const otherUser = onlineUsers.find((member)=> member.uid === otherUid);
+            return otherUser ? "Online now" : "Private conversation";
+        }
+
+        if(room?.type === "system" || systemRooms.has(roomName)){
+            return "Shared room conversation";
+        }
+
+        const memberCount = getRoomMembers(room || {
+            name: roomName,
+            createdBy: "",
+            createdByName: ""
+        }).length;
+        return `${memberCount} member${memberCount === 1 ? "" : "s"} in this room`;
     }
 
     function buildInviteLink(room:chatRoomInfo):string{
@@ -724,6 +779,7 @@ onAuthStateChanged(auth,(user)=>{
 
         typingUnsub = typingObj.listenTyping(roomName, currentUid, updateTypingDisplay);
         roomtitle.textContent = getRoomDisplayName(roomName);
+        roomsubtitle.textContent = getRoomSubtitle(roomName);
         markRoomAsRead(roomName);
         updateUnreadBadge(roomName, 0);
 
@@ -735,6 +791,7 @@ onAuthStateChanged(auth,(user)=>{
         reactionPicker.style.display = "none";
         mentionPopup.style.display = "none";
         renderRoomMeta(roomName);
+        setMobileConversationView("thread");
     }
 
     async function handlePendingNavigation():Promise<void>{
@@ -779,6 +836,7 @@ onAuthStateChanged(auth,(user)=>{
         }).join("");
 
         renderRoomMeta(chatroomObj.getRoom());
+        roomsubtitle.textContent = getRoomSubtitle(chatroomObj.getRoom());
     });
 
     onlineUsersList.addEventListener("click", async (event)=>{
@@ -799,6 +857,14 @@ onAuthStateChanged(auth,(user)=>{
 
         roomPanelOpen = !roomPanelOpen;
         renderRoomMeta(room.name);
+    });
+
+    mobileBackBtn.addEventListener("click",()=>{
+        setMobileConversationView("list");
+    });
+
+    window.addEventListener("resize",()=>{
+        setMobileConversationView(document.body.classList.contains("mobile-thread-active") ? "thread" : "list");
     });
 
     generateInviteBtn.addEventListener("click", async ()=>{
@@ -914,6 +980,7 @@ onAuthStateChanged(auth,(user)=>{
         availableRooms = getAllRooms(rooms);
         renderRoomList(availableRooms);
         renderRoomMeta(chatroomObj.getRoom());
+        roomsubtitle.textContent = getRoomSubtitle(chatroomObj.getRoom());
 
         const currentRoom = chatroomObj.getRoom();
         const room = getRoomByName(currentRoom);
@@ -924,7 +991,7 @@ onAuthStateChanged(auth,(user)=>{
         void handlePendingNavigation();
     });
 
-    const messageInput = newchatform.querySelector<HTMLInputElement>("#message");
+    const messageInput = getMessageComposer();
 
     function showMentionSuggestions(filter:string):void{
         const users = Array.from(messageuiObj.knownUsers.values())
@@ -951,6 +1018,11 @@ onAuthStateChanged(auth,(user)=>{
             }
 
             void typingObj.setTyping(chatroomObj.getRoom(), currentUid, currentUsername);
+            resizeComposer();
+        });
+
+        messageInput.addEventListener("focus",()=>{
+            setTimeout(()=> scrollToBottom(), 120);
         });
     }
 
@@ -963,6 +1035,7 @@ onAuthStateChanged(auth,(user)=>{
         const value = messageInput.value;
         const atIndex = value.lastIndexOf("@");
         messageInput.value = value.substring(0, atIndex) + "@" + name + " ";
+        resizeComposer();
         messageInput.focus();
         mentionPopup.style.display = "none";
     });
@@ -1052,13 +1125,15 @@ onAuthStateChanged(auth,(user)=>{
 
     startChatListener();
     setTimeout(()=> scrollToBottom(), 500);
+    roomsubtitle.textContent = getRoomSubtitle("general");
+    setMobileConversationView("list");
 
     let typingUnsub = typingObj.listenTyping("general", currentUid, updateTypingDisplay);
 
     newchatform.addEventListener("submit", async (event)=>{
         event.preventDefault();
 
-        const input = newchatform.querySelector<HTMLInputElement>("#message");
+        const input = getMessageComposer();
         const message = input?.value.trim() ?? "";
         if(!message) return;
 
@@ -1067,6 +1142,7 @@ onAuthStateChanged(auth,(user)=>{
             const quoteTo = composerContext?.mode === "quote" ? composerContext.reference : undefined;
             await chatroomObj.addChat(message, replyTo, quoteTo);
             newchatform.reset();
+            resizeComposer();
             void typingObj.clearTyping(chatroomObj.getRoom(), currentUid);
             emojiPicker.style.display = "none";
             mentionPopup.style.display = "none";
@@ -1352,7 +1428,11 @@ onAuthStateChanged(auth,(user)=>{
 
         typingUnsub = typingObj.listenTyping("general", currentUid, updateTypingDisplay);
         roomtitle.textContent = "general";
+        roomsubtitle.textContent = getRoomSubtitle("general");
         renderRoomList(availableRooms);
         renderRoomMeta("general");
+        setMobileConversationView("list");
     });
+
+    resizeComposer();
 });

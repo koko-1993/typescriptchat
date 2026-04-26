@@ -46,6 +46,9 @@ export class MessageUI{
         // @mentions -> highlighted
         html = html.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
 
+        // Preserve user line breaks for chat-style paragraphs
+        html = html.replace(/\n/g, "<br />");
+
         return html;
     }
 
@@ -173,9 +176,9 @@ export class MessageUI{
         usernameSpan.className = "username";
         usernameSpan.textContent = dataobj.username;
 
-        const messageSpan = document.createElement("span");
-        messageSpan.className = "message";
-        messageSpan.innerHTML = this.parseMessage(dataobj.message);
+        const messageBody = document.createElement("div");
+        messageBody.className = "message";
+        messageBody.innerHTML = this.parseMessage(dataobj.message);
 
         const timeSpan = document.createElement("span");
         timeSpan.className = "time small text-muted";
@@ -200,7 +203,7 @@ export class MessageUI{
             timeSpan.appendChild(readSpan);
         }
 
-        contentWrap.append(usernameSpan, messageSpan, timeSpan);
+        contentWrap.append(usernameSpan, messageBody, timeSpan);
 
         // Reaction bar
         const reactionBar = this.createReactionBar(dataobj);
