@@ -7,16 +7,23 @@ import {
     signOut,
     sendPasswordResetEmail,
     onAuthStateChanged,
-    signInWithPopup
+    signInWithPopup,
+    RecaptchaVerifier,
+    signInWithPhoneNumber,
+    ConfirmationResult
 } from "firebase/auth";
 
 
 export class Authorize {
 
     private defaultprofileimg:string;
+    private recaptchaVerifier:RecaptchaVerifier | null;
+    private recaptchaContainerId:string | null;
 
     constructor() {
         this.defaultprofileimg = "https://static.thenounproject.com/png/65476-200.png";
+        this.recaptchaVerifier = null;
+        this.recaptchaContainerId = null;
 
         // console.log(window.location.pathname); // /signin.html
         // console.log(window.location.pathname.replace(/\/[^/]*$/,'/')); 
@@ -42,6 +49,31 @@ export class Authorize {
         // /[^/]*$/
 
 
+    }
+
+    private getRecaptchaVerifier(containerId:string):RecaptchaVerifier {
+        if(this.recaptchaVerifier && this.recaptchaContainerId === containerId){
+            return this.recaptchaVerifier;
+        }
+
+        if(this.recaptchaVerifier){
+            this.recaptchaVerifier.clear();
+        }
+
+        this.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+            size: "invisible"
+        });
+        this.recaptchaContainerId = containerId;
+
+        return this.recaptchaVerifier;
+    }
+
+    clearPhoneVerifier():void {
+        if(this.recaptchaVerifier){
+            this.recaptchaVerifier.clear();
+            this.recaptchaVerifier = null;
+            this.recaptchaContainerId = null;
+        }
     }
 
     // helper to redirect relative to current directory
@@ -101,6 +133,72 @@ export class Authorize {
             console.error("Error Login users : ", error);
             const message = error instanceof Error ? error.message : "Unknown error";
             window.alert(message);
+        }
+
+    }
+
+
+    async sendPhoneVerification(phoneNumber:string, containerId:string):Promise<ConfirmationResult> {
+
+        try{
+            const appVerifier = this.getRecaptchaVerifier(containerId);
+            return await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+        }catch(error:unknown){
+            console.error("Error sending phone verification:", error);
+            this.clearPhoneVerifier();
+            const message = error instanceof Error ? error.message : "Unknown error";
+            window.alert(message);
+            throw error;
+        }
+
+    }
+
+
+    async completePhoneRegistration(
+        fullname:string,
+        verificationCode:string,
+        confirmationResult:ConfirmationResult
+    ):Promise<void> {
+
+        try{
+            const userCredential = await confirmationResult.confirm(verificationCode);
+            const user = userCredential.user;
+
+            await updateProfile(user, {
+                displayName: fullname,
+                photoURL: user.photoURL || this.defaultprofileimg
+            });
+
+            this.setLocalName(auth.currentUser || user);
+            this.clearPhoneVerifier();
+            this.redirectTo("index.html");
+        }catch(error:unknown){
+            console.error("Error completing phone registration:", error);
+            const message = error instanceof Error ? error.message : "Unknown error";
+            window.alert(message);
+            throw error;
+        }
+
+    }
+
+
+    async completePhoneLogin(
+        verificationCode:string,
+        confirmationResult:ConfirmationResult
+    ):Promise<void> {
+
+        try{
+            const userCredential = await confirmationResult.confirm(verificationCode);
+            const user = userCredential.user;
+
+            this.setLocalName(user);
+            this.clearPhoneVerifier();
+            this.redirectTo("index.html");
+        }catch(error:unknown){
+            console.error("Error completing phone login:", error);
+            const message = error instanceof Error ? error.message : "Unknown error";
+            window.alert(message);
+            throw error;
         }
 
     }
@@ -200,7 +298,7 @@ export class Authorize {
 
     // Local storage helper methods (firebase.com > Docs > javascript-modular > User)
     private setLocalName(userdata:User):void {
-        localStorage.setItem("username", userdata.displayName || "Guest");
+        localStorage.setItem("username", userdata.displayName || userdata.phoneNumber || "Guest");
     }
 
 

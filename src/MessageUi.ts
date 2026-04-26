@@ -1,5 +1,5 @@
 import { format, formatDistance } from 'date-fns'
-import { chatMessage } from "./Chatroom";
+import { chatMessage, messageReference } from "./Chatroom";
 import { User } from "firebase/auth";
 
 export class MessageUI{
@@ -112,10 +112,16 @@ export class MessageUI{
 
 
     // ===== Reply preview =====
-    private createReplyPreview(replyTo:{id:string;username:string;message:string}):HTMLElement{
+    private createReferencePreview(reference:messageReference, variant:'reply'|'quote'):HTMLElement{
         const div = document.createElement("div");
-        div.className = "reply-preview";
-        div.innerHTML = `<i class="fa-solid fa-reply"></i> <strong>${this.escapeHtml(replyTo.username)}</strong>: ${this.escapeHtml(replyTo.message).substring(0,60)}${replyTo.message.length > 60 ? '...' : ''}`;
+        div.className = `message-reference ${variant}-preview`;
+        div.setAttribute("data-ref-id", reference.id);
+        div.innerHTML = `
+            <span class="reference-label">${variant === "reply" ? "Reply" : "Quote"}</span>
+            <i class="fa-solid ${variant === "reply" ? "fa-reply" : "fa-quote-left"}"></i>
+            <strong>${this.escapeHtml(reference.username)}</strong>
+            <span>${this.escapeHtml(reference.message).substring(0,80)}${reference.message.length > 80 ? '...' : ''}</span>
+        `;
         return div;
     }
 
@@ -156,7 +162,11 @@ export class MessageUI{
 
         // Reply preview
         if(dataobj.replyTo){
-            contentWrap.appendChild(this.createReplyPreview(dataobj.replyTo));
+            contentWrap.appendChild(this.createReferencePreview(dataobj.replyTo, "reply"));
+        }
+
+        if(dataobj.quoteTo){
+            contentWrap.appendChild(this.createReferencePreview(dataobj.quoteTo, "quote"));
         }
 
         const usernameSpan = document.createElement("span");
@@ -219,6 +229,15 @@ export class MessageUI{
             replyBtn.innerHTML = '<i class="fa-solid fa-reply"></i>';
             replyBtn.title = "Reply";
             actionsDiv.appendChild(replyBtn);
+
+            const quoteBtn = document.createElement("button");
+            quoteBtn.className = "msg-action-btn quote-btn";
+            quoteBtn.setAttribute("data-id", dataobj.id);
+            quoteBtn.setAttribute("data-username", dataobj.username);
+            quoteBtn.setAttribute("data-message", dataobj.message);
+            quoteBtn.innerHTML = '<i class="fa-solid fa-quote-left"></i>';
+            quoteBtn.title = "Quote";
+            actionsDiv.appendChild(quoteBtn);
 
             // Reaction button
             const reactBtn = document.createElement("button");

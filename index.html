@@ -20,6 +20,14 @@
                 <h4 class="text-center mb-4">Chat Rooms</h4>
                 <div id="roomList"></div>
 
+                <div class="dm-section mt-3">
+                    <div class="dm-section-header">
+                        <i class="fa-regular fa-message"></i>
+                        <span>Direct Messages</span>
+                    </div>
+                    <div id="dmList"></div>
+                </div>
+
                 <!-- create room -->
                 <div class="create-room-section mt-3">
                     <form class="new-roomform" id="newRoomForm">
@@ -57,6 +65,11 @@
                 <h4 class="m-0"><i class="fa-solid fa-message"></i> Chat Box - <span id="roomtitle">general</span></h4>
 
                 <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm room-manage-toggle-btn" id="manageRoomBtn" style="display:none;">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <span>Manage</span>
+                    </button>
+
                     <!-- search -->
                     <div class="search-box" id="searchBox">
                         <button type="button" class="btn btn-sm search-toggle-btn" id="searchToggleBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -79,6 +92,48 @@
                 </div>
             </header>
 
+            <div class="room-meta-bar" id="roomMetaBar" style="display:none;">
+                <div class="room-meta-copy">
+                    <span class="room-meta-pill" id="roomVisibilityLabel">Private Room</span>
+                    <span class="room-meta-text" id="roomMemberCount">0 members</span>
+                    <span class="room-meta-text" id="roomAdminCount">0 admins</span>
+                </div>
+            </div>
+
+            <section class="room-admin-panel" id="roomAdminPanel" style="display:none;">
+                <div class="room-admin-panel-head">
+                    <div>
+                        <h5>Room Management</h5>
+                        <p>Admins can manage members and generate invite links for this room.</p>
+                    </div>
+                </div>
+
+                <div class="room-admin-grid">
+                    <div class="room-admin-card">
+                        <div class="room-admin-card-title">Invite Link</div>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="roomInviteLink" class="form-control" placeholder="Generate an invite link..." readonly />
+                            <button type="button" class="btn room-admin-action-btn" id="generateInviteBtn">Generate</button>
+                            <button type="button" class="btn room-admin-action-btn secondary" id="copyInviteBtn">Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="room-admin-card">
+                        <div class="room-admin-card-title">Add Member</div>
+                        <form id="addMemberForm" class="room-admin-form">
+                            <select id="memberSelect" class="form-select form-select-sm">
+                                <option value="">Select an online user</option>
+                            </select>
+                            <button type="submit" class="btn room-admin-action-btn">Add</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="room-members-panel">
+                    <div class="room-admin-card-title">Members & Admins</div>
+                    <div class="room-member-list" id="roomMemberList"></div>
+                </div>
+            </section>
 
             <!-- pinned messages bar -->
             <div class="pinned-bar" id="pinnedBar" style="display:none;">
@@ -117,7 +172,8 @@
             <!-- reply preview bar -->
             <div class="reply-bar" id="replyBar" style="display:none;">
                 <div class="reply-bar-content">
-                    <i class="fa-solid fa-reply"></i>
+                    <span class="reply-context-label" id="replyContextLabel">Replying to</span>
+                    <i class="fa-solid fa-reply" id="replyContextIcon"></i>
                     <span id="replyPreviewText"></span>
                 </div>
                 <button type="button" class="btn btn-sm reply-cancel-btn" id="replyCancelBtn"><i class="fa-solid fa-xmark"></i></button>

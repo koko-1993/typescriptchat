@@ -1,6 +1,12 @@
 import {db} from "./firebaseConfig";
-import {collection,addDoc,onSnapshot,Timestamp,query,where, Unsubscribe, orderBy, doc, deleteDoc, updateDoc, getDocs, setDoc, arrayUnion, arrayRemove, getDoc, writeBatch, WriteBatch} from "firebase/firestore";
+import {collection,addDoc,onSnapshot,Timestamp,query,where, Unsubscribe, orderBy, doc, deleteDoc, updateDoc, getDocs, setDoc, arrayUnion, arrayRemove, getDoc, writeBatch, WriteBatch, deleteField} from "firebase/firestore";
 import {FirebaseError} from "firebase/app";
+
+export interface messageReference{
+    id:string;
+    username:string;
+    message:string;
+}
 
 export interface chatMessage{
     id?:string;          // Firestore document ID (added after fetch)
@@ -14,11 +20,8 @@ export interface chatMessage{
     pinned?:boolean;     // Pinned message flag
     reactions?:{[emoji:string]:string[]};  // emoji -> uid[]
     readBy?:string[];    // UIDs that have read this message
-    replyTo?:{           // Reply reference
-        id:string;
-        username:string;
-        message:string;
-    };
+    replyTo?:messageReference;   // Reply reference
+    quoteTo?:messageReference;   // Quote reference
 }
 
 export interface chatRoomInfo{
@@ -26,6 +29,13 @@ export interface chatRoomInfo{
     createdBy:string;
     createdByName:string;
     type?:string;
+    archived?:boolean;
+    participants?:string[];
+    participantNames?:string[];
+    members?:string[];
+    admins?:string[];
+    memberProfiles?:Record<string,string>;
+    inviteCode?:string;
 }
 
 export class Chatroom{
@@ -64,7 +74,7 @@ export class Chatroom{
 
 
     // create chat message
-    async addChat(message:string, replyTo?:{id:string;username:string;message:string}):Promise<void>{
+    async addChat(message:string, replyTo?:messageReference, quoteTo?:messageReference):Promise<void>{
 
         const now = new Date();
         const chatdata:chatMessage = {
@@ -78,6 +88,10 @@ export class Chatroom{
 
         if(replyTo){
             chatdata.replyTo = replyTo;
+        }
+
+        if(quoteTo){
+            chatdata.quoteTo = quoteTo;
         }
 
         try{
@@ -207,6 +221,18 @@ export class Chatroom{
             const existingRoom = await getDoc(roomRef);
 
             if(existingRoom.exists()){
+                const existingData = existingRoom.data();
+
+                if(existingData.archived){
+                    await updateDoc(roomRef,{
+                        archived: false,
+                        archivedAt: null,
+                        archivedBy: null,
+                        restoredAt: Timestamp.now()
+                    });
+                    return;
+                }
+
                 throw new Error("A room with this name already exists.");
             }
 
@@ -214,7 +240,12 @@ export class Chatroom{
                 name: roomName,
                 createdBy: this.uid,
                 createdByName: this.username,
-                createdAt: Timestamp.now()
+                createdAt: Timestamp.now(),
+                admins: [this.uid],
+                members: [this.uid],
+                memberProfiles: {
+                    [this.uid]: this.username
+                }
             });
         }catch(error:unknown){
             console.error("Error creating room:",error);
@@ -232,11 +263,128 @@ export class Chatroom{
                     name: data.name || doc.id,
                     createdBy: data.createdBy || "",
                     createdByName: data.createdByName || "Unknown",
-                    type: data.type || "room"
+                    type: data.type || "room",
+                    archived: Boolean(data.archived),
+                    participants: data.participants || [],
+                    participantNames: data.participantNames || [],
+                    members: data.members || [],
+                    admins: data.admins || [],
+                    memberProfiles: data.memberProfiles || {},
+                    inviteCode: data.inviteCode || ""
                 });
             });
             callback(roomsList);
         });
+    }
+
+
+    async addMemberToRoom(roomName:string, memberUid:string, memberName:string):Promise<void>{
+        try{
+            const roomRef = doc(db,"rooms",roomName);
+            const roomSnap = await getDoc(roomRef);
+
+            if(!roomSnap.exists()){
+                throw new Error("Room not found.");
+            }
+
+            await updateDoc(roomRef,{
+                members: arrayUnion(memberUid),
+                [`memberProfiles.${memberUid}`]: memberName,
+                updatedAt: Timestamp.now()
+            });
+        }catch(error:unknown){
+            console.error("Error adding room member:",error);
+            const msg = this.getErrorMessage(error);
+            window.alert(msg);
+            throw error;
+        }
+    }
+
+
+    async removeMemberFromRoom(roomName:string, memberUid:string):Promise<void>{
+        try{
+            const roomRef = doc(db,"rooms",roomName);
+            await updateDoc(roomRef,{
+                members: arrayRemove(memberUid),
+                admins: arrayRemove(memberUid),
+                [`memberProfiles.${memberUid}`]: deleteField(),
+                updatedAt: Timestamp.now()
+            });
+        }catch(error:unknown){
+            console.error("Error removing room member:",error);
+            const msg = this.getErrorMessage(error);
+            window.alert(msg);
+            throw error;
+        }
+    }
+
+
+    async setRoomAdminStatus(roomName:string, memberUid:string, isAdmin:boolean):Promise<void>{
+        try{
+            const roomRef = doc(db,"rooms",roomName);
+            await updateDoc(roomRef,{
+                admins: isAdmin ? arrayUnion(memberUid) : arrayRemove(memberUid),
+                updatedAt: Timestamp.now()
+            });
+        }catch(error:unknown){
+            console.error("Error updating room admin status:",error);
+            const msg = this.getErrorMessage(error);
+            window.alert(msg);
+            throw error;
+        }
+    }
+
+
+    async generateInviteLink(roomName:string, baseUrl:string):Promise<string>{
+        try{
+            const inviteCode = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0,8)}`;
+            await updateDoc(doc(db,"rooms",roomName),{
+                inviteCode,
+                inviteCreatedAt: Timestamp.now(),
+                inviteCreatedBy: this.uid
+            });
+            return `${baseUrl}?room=${encodeURIComponent(roomName)}&invite=${encodeURIComponent(inviteCode)}`;
+        }catch(error:unknown){
+            console.error("Error generating invite link:",error);
+            const msg = this.getErrorMessage(error);
+            window.alert(msg);
+            throw error;
+        }
+    }
+
+
+    async joinRoomWithInvite(roomName:string, inviteCode:string, memberName:string):Promise<boolean>{
+        try{
+            const roomRef = doc(db,"rooms",roomName);
+            const roomSnap = await getDoc(roomRef);
+
+            if(!roomSnap.exists()){
+                throw new Error("Room not found.");
+            }
+
+            const roomData = roomSnap.data();
+
+            if(roomData.type === "dm"){
+                throw new Error("Invite links are not available for direct messages.");
+            }
+
+            if(roomData.inviteCode !== inviteCode){
+                throw new Error("Invite link is invalid or expired.");
+            }
+
+            await updateDoc(roomRef,{
+                members: arrayUnion(this.uid),
+                [`memberProfiles.${this.uid}`]: memberName,
+                updatedAt: Timestamp.now()
+            });
+
+            return true;
+        }catch(error:unknown){
+            console.error("Error joining room with invite:",error);
+            const msg = this.getErrorMessage(error);
+            window.alert(msg);
+            return false;
+        }
     }
 
 
@@ -294,15 +442,16 @@ export class Chatroom{
             const roomTypingSnap = await getDocs(query(this.typing, where("room", "==", roomName)));
             const operations:Array<(batch:WriteBatch)=>void> = [];
 
-            roomChatsSnap.forEach((chatDoc)=>{
-                operations.push((batch)=> batch.delete(chatDoc.ref));
-            });
-
             roomTypingSnap.forEach((typingDoc)=>{
                 operations.push((batch)=> batch.delete(typingDoc.ref));
             });
 
-            operations.push((batch)=> batch.delete(roomRef));
+            operations.push((batch)=> batch.update(roomRef, {
+                archived: true,
+                archivedAt: Timestamp.now(),
+                archivedBy: this.uid,
+                chatCount: roomChatsSnap.size
+            }));
 
             await this.commitInChunks(operations);
         }catch(error:unknown){
@@ -367,6 +516,12 @@ export class Chatroom{
                 type: 'dm',
                 participants: [this.uid, targetUid],
                 participantNames: [this.username, targetUsername],
+                admins: [this.uid, targetUid],
+                members: [this.uid, targetUid],
+                memberProfiles: {
+                    [this.uid]: this.username,
+                    [targetUid]: targetUsername
+                },
                 createdBy: this.uid,
                 createdByName: this.username,
                 createdAt: Timestamp.now()
