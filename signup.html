@@ -39,37 +39,6 @@
 
             </form>
 
-            <div class="auth-divider"><span>Or sign up with phone</span></div>
-
-            <form id="phoneSignupForm">
-                <div class="mb-3">
-                    <label for="phoneFullname" class="form-label">Full Name</label>
-                    <input type="text" name="phoneFullname" id="phoneFullname" class="form-control" placeholder="Full Name" required />
-                </div>
-
-                <div class="mb-3">
-                    <label for="phoneNumber" class="form-label">Phone Number</label>
-                    <input type="tel" name="phoneNumber" id="phoneNumber" class="form-control" placeholder="+959123456789" required />
-                    <div class="form-text auth-hint">Use full international format, for example `+959...`</div>
-                </div>
-
-                <div class="d-grid gap-2 mb-3">
-                    <button type="button" id="phoneSignupSendBtn" class="btn btn-outline-primary">Send OTP</button>
-                </div>
-
-                <div class="mb-3">
-                    <label for="phoneSignupCode" class="form-label">Verification Code</label>
-                    <input type="text" name="phoneSignupCode" id="phoneSignupCode" class="form-control" placeholder="Enter OTP" disabled required />
-                </div>
-
-                <div id="phoneSignupRecaptcha" class="recaptcha-slot"></div>
-                <div id="phoneSignupStatus" class="auth-status"></div>
-
-                <div class="d-flex justify-content-end mb-3">
-                    <button type="submit" class="btn btn-primary">Verify & Sign Up</button>
-                </div>
-            </form>
-
             <div class="text-center">
                 <a href="./signin.html" class="d-block text-decoration-none text-primary mb-2">Already have an account ? Sign in here!</a>
             </div>
